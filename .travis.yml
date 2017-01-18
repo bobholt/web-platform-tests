@@ -58,3 +58,5 @@ notifications:
   email:
     on_success: never
     on_failure: always
+  webhooks:
+    -http://45.55.222.191/savage/travis
