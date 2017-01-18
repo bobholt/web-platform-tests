@@ -278,6 +278,8 @@ def call(*args):
 
 
 def get_git_cmd(repo_path):
+    if not os.path.exists(repo_path):
+        call("mkdir", "-p", repo_path)
     def git(cmd, *args):
         full_cmd = ["git", cmd] + list(args)
         try:
