@@ -558,7 +558,7 @@ def process_results(log, iterations):
     for test in results:
         for subtest in test["subtests"]:
             if is_inconsistent(subtest["status"], iterations):
-                inconsistent.append((test["name"], subtest["name"], subtest["status"]))
+                inconsistent.append((test["name"], subtest["name"], subtest["status"], subtest["messages"]))
     return results, inconsistent
 
 
@@ -605,9 +605,12 @@ def table(headings, data, log):
 def write_inconsistent(inconsistent, iterations):
     """Output inconsistent tests to logger.error."""
     logger.error("## Unstable results ##\n")
-    strings = [("`%s`" % markdown_adjust(test), ("`%s`" % markdown_adjust(subtest)) if subtest else "", err_string(results, iterations))
-               for test, subtest, results in inconsistent]
-    table(["Test", "Subtest", "Results"], strings, logger.error)
+    strings = [("`%s`" % markdown_adjust(test),
+                ("`%s`" % markdown_adjust(subtest)) if subtest else "",
+                err_string(results, iterations),
+                "`%s`" % markdown_adjust(";".join(messages)))
+               for test, subtest, results, messages in inconsistent]
+    table(["Test", "Subtest", "Results", "Messages"], strings, logger.error)
 
 
 def write_results(results, iterations, comment_pr):
@@ -637,9 +640,11 @@ def write_results(results, iterations, comment_pr):
         else:
             logger.info("### %s ###" % name)
         strings = [("", err_string(test["status"], iterations), "")]
+
         strings.extend(((("`%s`" % markdown_adjust(subtest["name"])) if subtest
                          else "", err_string(subtest["status"], iterations),
-                         "\n".join(subtest["messages"]))
+                         "`%s`" % markdown_adjust(';'.join(subtest["messages"])),
+                         )
                         for subtest in test["subtests"]))
         table(["Subtest", "Results", "Messages"], strings, logger.info)
         if pr_number:
