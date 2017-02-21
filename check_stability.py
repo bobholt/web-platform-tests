@@ -29,6 +29,7 @@ wptcommandline = None
 wptrunner = None
 wpt_root = None
 wptrunner_root = None
+product_args = None
 
 logger = None
 
@@ -279,6 +280,36 @@ class Chrome(Browser):
             "product": "chrome",
             "binary": self.binary,
             "webdriver_binary": "%s/chromedriver" % root,
+            "test_types": ["testharness", "reftest"]
+        }
+
+class Sauce(Browser):
+    """Sauce-specific interface.
+
+    Includes installation and wptrunner setup methods.
+    """
+
+    product = "sauce"
+
+    def install(self):
+        """No need to install Sauce-run browsers locally."""
+        pass
+
+    def install_webdriver(self):
+        """No need to install webdriver locally."""
+        pass
+
+    def version(self, root):
+        """Retrieve the release version of the browser under test."""
+        return product_args[2]
+
+    def wptrunner_args(self, root):
+        """Return Sauce-specific wpt-runner arguments."""
+        return {
+            "product": "sauce",
+            "sauce_browser": product_args[1],
+            "sauce_platform": product_args[3],
+            "sauce_version": product_args[2],
             "test_types": ["testharness", "reftest"]
         }
 
@@ -574,7 +605,7 @@ def format_comment_title(product):
     title = parts[0].title()
 
     if len(parts) > 1:
-       title += " (%s channel)" % parts[1]
+       title += " (%s)" % parts[1]
 
     return "# %s #" % title
 
@@ -694,6 +725,7 @@ def main():
     global wpt_root
     global wptrunner_root
     global logger
+    global product_args
 
     retcode = 0
     parser = get_parser()
@@ -715,13 +747,15 @@ def main():
 
     os.chdir(args.root)
 
-    browser_name = args.product.split(":")[0]
+    product_args = args.product.split(":")
+    browser_name = product_args[0]
 
     with TravisFold("browser_setup"):
         logger.info(format_comment_title(args.product))
 
         browser_cls = {"firefox": Firefox,
-                       "chrome": Chrome}.get(browser_name)
+                       "chrome": Chrome,
+                       "sauce": Sauce}.get(browser_name)
         if browser_cls is None:
             logger.critical("Unrecognised browser %s" % browser_name)
             return 1
