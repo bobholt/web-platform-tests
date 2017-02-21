@@ -3,19 +3,24 @@ sudo: required
 language: python
 addons:
   hosts:
-    - web-platform.test
-    - www.web-platform.test
-    - www1.web-platform.test
-    - www2.web-platform.test
-    - xn--n8j6ds53lwwkrqhv28a.web-platform.test
-    - xn--lve-6lad.web-platform.test
+  - web-platform.test
+  - www.web-platform.test
+  - www1.web-platform.test
+  - www2.web-platform.test
+  - xn--n8j6ds53lwwkrqhv28a.web-platform.test
+  - xn--lve-6lad.web-platform.test
+  sauce_connect:
+    username: bobholt_wpt
+    tunnel_domains: web-platform.test, *.web-platform.test
+  jwt:
+    secure: yHubgFTEjOGx64L/BfVYCR2Bv3i7xGbusrFbDGNltbz6ZMNmKWGfb+Wl1lbtgs8PY/QW1sp6sfly+HoBiG9NkL3bgtTKpaw+nLFByBuPCzr8E0Lvo3Qi6CYdRQZ62UFfQ7RYLqsGhreO2SDpEL6ZHyM72djvZFvGUGbBhcXfTvwMdGf2cWmEoBT25E5YRpAKA3JAOFmGjj8ZpLyHf3wkOC60ZUObZ9Kf32Fk3xn/ClO5bJssuom8EPAAsK3+NVQwOQjJ4ThQuJz3NUGZXLT6J1aHLuG9K2XzrLg2cqyAx68oXieXTemmuOczMAZ3dY0qF/+iWCyxXmA9/2d8Tzi/3fX9Gw9zmcakuntUqQDipx7GBn5xO3HqwZ1qYb2zTqeqRmarcvG3PGLw6vvGxzNE4M/Vq7yOsP3ToChCavTTWYrLNaGUdomPxDeHSsYd9phe/dNBZBvOWVeFMoiKSEEddRDHYQSzYHt2e9w/urRXqH68RKR+YZC97dprXzOeS18fzUGmxd3RHrLce8Acxc5DDJvVP7t1q5XIPQxoJJjGl2mRDXxrSzVLf5Si4N2BzbVQ1gcfUChBYyOX6WGx8bNZx0Xu5sZeVk4eRqc0QEHyqGjsj/d/zWKqCVZOgE1qmEu/fa9d0Lx0wZgH1AdaXhXgu4EWzzv292i1KvxR/RtXuVE=
 before_install:
-  - git submodule update --init --recursive
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
+- git submodule update --init --recursive
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
 install:
-  - pip install -U setuptools
-  - pip install -U requests
+- pip install -U setuptools
+- pip install -U requests
 matrix:
   include:
     - os: linux
@@ -44,11 +49,21 @@ matrix:
       env:
         - secure: "YTSXPwI0DyCA1GhYrLT9KMEV6b7QQKuEeaQgeFDP38OTzJ1+cIj3CC4SRNqbnJ/6SJwPGcdqSxLuV8m4e5HFFnyCcQnJe6h8EMsTehZ7W3j/fP9UYrJqYqvGpe3Vj3xblO5pwBYmq7sg3jAmmuCgAgOW6VGf7cRMucrsmFeo7VM="
         - SCRIPT=ci_stability.sh PRODUCT=chrome:unstable
+    - os: linux
+      python: '2.7'
+      env:
+        - secure: YTSXPwI0DyCA1GhYrLT9KMEV6b7QQKuEeaQgeFDP38OTzJ1+cIj3CC4SRNqbnJ/6SJwPGcdqSxLuV8m4e5HFFnyCcQnJe6h8EMsTehZ7W3j/fP9UYrJqYqvGpe3Vj3xblO5pwBYmq7sg3jAmmuCgAgOW6VGf7cRMucrsmFeo7VM=
+        - SCRIPT=ci_stability.sh PRODUCT=sauce:safari:10.0 PLATFORM='macOS 10.12'
+    - os: linux
+      python: '2.7'
+      env:
+      - secure: YTSXPwI0DyCA1GhYrLT9KMEV6b7QQKuEeaQgeFDP38OTzJ1+cIj3CC4SRNqbnJ/6SJwPGcdqSxLuV8m4e5HFFnyCcQnJe6h8EMsTehZ7W3j/fP9UYrJqYqvGpe3Vj3xblO5pwBYmq7sg3jAmmuCgAgOW6VGf7cRMucrsmFeo7VM=
+      - SCRIPT=ci_stability.sh PRODUCT=sauce:MicrosoftEdge:14.14393 PLATFORM='Windows 10'
 script:
-  - bash $SCRIPT
+- bash $SCRIPT
 cache:
   directories:
-    - $HOME/.cache/pip
+  - "$HOME/.cache/pip"
 notifications:
   email:
     on_success: never
