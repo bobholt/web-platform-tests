@@ -419,7 +419,7 @@ def build_manifest():
 
 def install_wptrunner():
     """Clone and install wptrunner."""
-    call("git", "clone", "--depth=1", "https://github.com/w3c/wptrunner.git", wptrunner_root)
+    call("git", "clone", "--depth=1", "--branch=safari-sauce", "--single-branch", "https://github.com/bobholt/wptrunner.git", wptrunner_root)
     git = get_git_cmd(wptrunner_root)
     git("submodule", "update", "--init", "--recursive")
     call("pip", "install", wptrunner_root)
@@ -892,7 +892,6 @@ def main():
             write_results(results, args.iterations, args.comment_pr)
     else:
         logger.info("No tests run.")
-
     return retcode
 
 
