@@ -29,6 +29,7 @@ wptcommandline = None
 wptrunner = None
 wpt_root = None
 wptrunner_root = None
+sauce_platform = None
 product_args = None
 
 logger = None
@@ -292,8 +293,8 @@ class Sauce(Browser):
     product = "sauce"
 
     def install(self):
-        """No need to install Sauce-run browsers locally."""
-        pass
+        """Install sauce selenium python deps."""
+        call("pip", "install", "-r", os.path.join(wptrunner_root, "requirements_sauce.txt"))
 
     def install_webdriver(self):
         """No need to install webdriver locally."""
@@ -308,7 +309,7 @@ class Sauce(Browser):
         return {
             "product": "sauce",
             "sauce_browser": product_args[1],
-            "sauce_platform": product_args[3],
+            "sauce_platform": sauce_platform,
             "sauce_version": product_args[2],
             "test_types": ["testharness", "reftest"]
         }
@@ -415,9 +416,8 @@ def build_manifest():
 
 def install_wptrunner():
     """Clone and install wptrunner."""
-    call("git", "clone", "--depth=1", "https://github.com/bobholt/wptrunner.git", wptrunner_root)
+    call("git", "clone", "--depth=1", "--branch=safari-sauce", "--single-branch", "https://github.com/bobholt/wptrunner.git", wptrunner_root)
     git = get_git_cmd(wptrunner_root)
-    git("checkout", "-b", "safari-sauce", "origin/safari-sauce")
     git("submodule", "update", "--init", "--recursive")
     call("pip", "install", wptrunner_root)
 
@@ -715,6 +715,10 @@ def get_parser():
                         action="store",
                         type=int,
                         help="Maximum number of bytes to write to standard output/error")
+    parser.add_argument("--sauce-platform",
+                        action="store",
+                        default=os.environ.get("PLATFORM"),
+                        help="Sauce Labs OS")
     parser.add_argument("product",
                         action="store",
                         help="Product to run against (`browser-name` or 'browser-name:channel')")
@@ -727,6 +731,7 @@ def main():
     global wptrunner_root
     global logger
     global product_args
+    global sauce_platform
 
     retcode = 0
     parser = get_parser()
@@ -747,7 +752,7 @@ def main():
         return 1
 
     os.chdir(args.root)
-
+    sauce_platform = args.sauce_platform
     product_args = args.product.split(":")
     browser_name = product_args[0]
 
