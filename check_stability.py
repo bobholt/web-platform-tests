@@ -828,6 +828,7 @@ def main():
         with open("raw.log", "rb") as log:
             results, inconsistent = process_results(log, args.iterations)
 
+
     if results:
         if inconsistent:
             write_inconsistent(inconsistent, args.iterations)
