@@ -1,5 +1,7 @@
 "use strict";
 
+function noop() {}
+
 function testAddRange(exception, range, endpoints, qualifier, testName) {
     if (!isSelectableNode(endpoints[0]) || !isSelectableNode(endpoints[2])) {
         testAddRangeDoesNothing(exception, range, endpoints, qualifier, testName);
