@@ -29,6 +29,8 @@ wptcommandline = None
 wptrunner = None
 wpt_root = None
 wptrunner_root = None
+sauce_args = None
+product_args = None
 
 logger = None
 
@@ -282,6 +284,39 @@ class Chrome(Browser):
             "test_types": ["testharness", "reftest"]
         }
 
+class Sauce(Browser):
+    """Sauce-specific interface.
+
+    Includes installation and wptrunner setup methods.
+    """
+
+    product = "sauce"
+
+    def install(self):
+        """Install sauce selenium python deps."""
+        call("pip", "install", "-r", os.path.join(wptrunner_root, "requirements_sauce.txt"))
+
+    def install_webdriver(self):
+        """No need to install webdriver locally."""
+        pass
+
+    def version(self, root):
+        """Retrieve the release version of the browser under test."""
+        return product_args[2]
+
+    def wptrunner_args(self, root):
+        """Return Sauce-specific wpt-runner arguments."""
+        return {
+            "product": "sauce",
+            "sauce_browser": product_args[1],
+            "sauce_platform": sauce_args.get('platform'),
+            "sauce_version": product_args[2],
+            "sauce_build": sauce_args.get('build'),
+            "sauce_tag": sauce_args.get('tag'),
+            "sauce_tunnel_id": sauce_args.get('tunnel_identifier'),
+            "test_types": ["testharness", "reftest"]
+        }
+
 
 def get(url):
     """Issue GET request to a given URL and return the response."""
@@ -384,7 +419,7 @@ def build_manifest():
 
 def install_wptrunner():
     """Clone and install wptrunner."""
-    call("git", "clone", "--depth=1", "https://github.com/w3c/wptrunner.git", wptrunner_root)
+    call("git", "clone", "--depth=1", "--branch=safari-sauce", "--single-branch", "https://github.com/bobholt/wptrunner.git", wptrunner_root)
     git = get_git_cmd(wptrunner_root)
     git("submodule", "update", "--init", "--recursive")
     call("pip", "install", wptrunner_root)
@@ -606,7 +641,7 @@ def format_comment_title(product):
     title = parts[0].title()
 
     if len(parts) > 1:
-       title += " (%s channel)" % parts[1]
+       title += " (%s)" % parts[1]
 
     return "# %s #" % title
 
@@ -715,6 +750,22 @@ def get_parser():
                         action="store",
                         type=int,
                         help="Maximum number of bytes to write to standard output/error")
+    parser.add_argument("--sauce-platform",
+                        action="store",
+                        default=os.environ.get("PLATFORM"),
+                        help="Sauce Labs OS")
+    parser.add_argument("--sauce-build-number",
+                        action="store",
+                        default=os.environ.get("TRAVIS_BUILD_NUMBER"),
+                        help="Sauce Labs build identifier")
+    parser.add_argument("--sauce-build-tag",
+                        action="store",
+                        default=os.environ.get("TRAVIS_PYTHON_VERSION"),
+                        help="Sauce Labs build tag")
+    parser.add_argument("--sauce-tunnel-identifier",
+                        action="store",
+                        default=os.environ.get("TRAVIS_JOB_NUMBER"),
+                        help="Sauce Connect tunnel identifier")
     parser.add_argument("product",
                         action="store",
                         help="Product to run against (`browser-name` or 'browser-name:channel')")
@@ -726,6 +777,8 @@ def main():
     global wpt_root
     global wptrunner_root
     global logger
+    global product_args
+    global sauce_args
 
     retcode = 0
     parser = get_parser()
@@ -746,14 +799,21 @@ def main():
         return 1
 
     os.chdir(args.root)
-
-    browser_name = args.product.split(":")[0]
+    sauce_args = {
+        "platform": args.sauce_platform,
+        "build": args.sauce_build_number,
+        "tag": args.sauce_build_tag,
+        "tunnel_identifier": args.sauce_tunnel_identifier,
+    }
+    product_args = args.product.split(":")
+    browser_name = product_args[0]
 
     with TravisFold("browser_setup"):
         logger.info(format_comment_title(args.product))
 
         browser_cls = {"firefox": Firefox,
-                       "chrome": Chrome}.get(browser_name)
+                       "chrome": Chrome,
+                       "sauce": Sauce}.get(browser_name)
         if browser_cls is None:
             logger.critical("Unrecognised browser %s" % browser_name)
             return 1
@@ -832,7 +892,6 @@ def main():
             write_results(results, args.iterations, args.comment_pr)
     else:
         logger.info("No tests run.")
-
     return retcode
 
 
