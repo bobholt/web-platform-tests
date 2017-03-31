@@ -905,6 +905,7 @@ def main():
             write_results(results, args.iterations, args.comment_pr)
     else:
         logger.info("No tests run.")
+
     return retcode
 
 
