@@ -284,6 +284,7 @@ class Chrome(Browser):
             "test_types": ["testharness", "reftest"]
         }
 
+
 class Sauce(Browser):
     """Sauce-specific interface.
 
@@ -309,11 +310,13 @@ class Sauce(Browser):
         return {
             "product": "sauce",
             "sauce_browser": product_args[1],
-            "sauce_platform": sauce_args.get('platform'),
-            "sauce_version": product_args[2],
             "sauce_build": sauce_args.get('build'),
+            "sauce_key": sauce_args.get('sauce_key'),
+            "sauce_platform": sauce_args.get('platform'),
             "sauce_tag": sauce_args.get('tag'),
             "sauce_tunnel_id": sauce_args.get('tunnel_identifier'),
+            "sauce_user": sauce_args.get('sauce_user'),
+            "sauce_version": product_args[2],
             "test_types": ["testharness", "reftest"]
         }
 
@@ -419,7 +422,7 @@ def build_manifest():
 
 def install_wptrunner():
     """Clone and install wptrunner."""
-    call("git", "clone", "--depth=1", "--branch=safari-sauce", "--single-branch", "https://github.com/bobholt/wptrunner.git", wptrunner_root)
+    call("git", "clone", "--depth=1", "--branch=safari-sauce-storage", "--single-branch", "https://github.com/bobholt/wptrunner.git", wptrunner_root)
     git = get_git_cmd(wptrunner_root)
     git("submodule", "update", "--init", "--recursive")
     call("pip", "install", wptrunner_root)
@@ -766,6 +769,14 @@ def get_parser():
                         action="store",
                         default=os.environ.get("TRAVIS_JOB_NUMBER"),
                         help="Sauce Connect tunnel identifier")
+    parser.add_argument("--sauce-user",
+                        action="store",
+                        default=os.environ.get("SAUCE_USERNAME"),
+                        help="Sauce Labs user name")
+    parser.add_argument("--sauce-key",
+                        action="store",
+                        default=os.environ.get("SAUCE_ACCESS_KEY"),
+                        help="Sauce Labs access key")
     parser.add_argument("product",
                         action="store",
                         help="Product to run against (`browser-name` or 'browser-name:channel')")
@@ -802,6 +813,8 @@ def main():
     sauce_args = {
         "platform": args.sauce_platform,
         "build": args.sauce_build_number,
+        "sauce_key": args.sauce_key,
+        "sauce_user": args.sauce_user,
         "tag": args.sauce_build_tag,
         "tunnel_identifier": args.sauce_tunnel_identifier,
     }
