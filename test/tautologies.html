@@ -5,6 +5,11 @@
 <script src=/resources/testharnessreport.js></script>
 <div id=log></div>
 <script>
+
+test(function() {
+  assert_equals(Math.random() > 0.5, true);
+}, "flaky")
+
 test(function() {
   assert_true(true);
 }, "assert_true");
