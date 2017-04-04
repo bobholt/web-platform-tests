@@ -9,6 +9,11 @@ addons:
     - www2.web-platform.test
     - xn--n8j6ds53lwwkrqhv28a.web-platform.test
     - xn--lve-6lad.web-platform.test
+  sauce_connect:
+    username: bobholt_wpt
+    tunnel_domains: web-platform.test, *.web-platform.test
+  jwt:
+    secure: "FrTJ0wJfI+qx53lJDTMF5fNp6uxuPD8w+xjvGKX4n7wkhu01cEy6zBMAxEd47hk0A0Vd/vIpXLdTRoGKu5p2St3vqbmDJ7MSdUSOdqbVL1trmWYblDGqAuwsbChNhxT5EfHLTJYYrek21Ylhh1cqaU8g7o0zrSfPO8PYuAEENB6eYeaCVUdb0JxGKSqREiT3YGSBFSXNQCfP5p6lzI3pbxXumX87Zrqg69D0COLwRk2z/TBOnXIHQ8XVoehrtE9HcLEBQTJuuEwAjKewv0HVbrVhtwtIQpRvwJLrQGowBkhEdqF9IRBhBqF2vmZKSmYFrmp6DlwWvXnwtorRMtkkDULPDYPavi47XgbggObPnp9STY4kcHZR71no/3tm6JjcPP9DZDLYfMrXUVjplMkdNY2d8gk0MF4Imb2jx99EDWcY7PgdNfjDbKszOr8OqsLHPc5Z26aLMHhu13uvuBmBRO4RNsNNpUH2HFdOBVo2UTcU894UU3it6byraZ5RiYCbXCmKWOYbEcE6rY7CO/mqdhKbCWSRQwHbxg98kwCEffm46P+X7Zs6ak1mwZ3F2B1+igjWqcJ5JkcHqtr/XErFqcVxo2kbheMqZOBZXrBvomdxYLlYmK0ZmK+/akKXnFY/nrBsQrdPWvMC/kIzD8Doe95sJhE9lS3vJBcO2mcJTJw="
 before_install:
   - git submodule update --init --recursive
   - export DISPLAY=:99.0
@@ -44,6 +49,16 @@ matrix:
       env:
         - secure: "YTSXPwI0DyCA1GhYrLT9KMEV6b7QQKuEeaQgeFDP38OTzJ1+cIj3CC4SRNqbnJ/6SJwPGcdqSxLuV8m4e5HFFnyCcQnJe6h8EMsTehZ7W3j/fP9UYrJqYqvGpe3Vj3xblO5pwBYmq7sg3jAmmuCgAgOW6VGf7cRMucrsmFeo7VM="
         - SCRIPT=ci_stability.sh PRODUCT=chrome:unstable
+    - os: linux
+      python: "2.7"
+      env:
+        - secure: "YTSXPwI0DyCA1GhYrLT9KMEV6b7QQKuEeaQgeFDP38OTzJ1+cIj3CC4SRNqbnJ/6SJwPGcdqSxLuV8m4e5HFFnyCcQnJe6h8EMsTehZ7W3j/fP9UYrJqYqvGpe3Vj3xblO5pwBYmq7sg3jAmmuCgAgOW6VGf7cRMucrsmFeo7VM="
+        - SCRIPT=ci_stability.sh PRODUCT=sauce:safari:10.0 PLATFORM='macOS 10.12'
+    - os: linux
+      python: "2.7"
+      env:
+        - secure: "YTSXPwI0DyCA1GhYrLT9KMEV6b7QQKuEeaQgeFDP38OTzJ1+cIj3CC4SRNqbnJ/6SJwPGcdqSxLuV8m4e5HFFnyCcQnJe6h8EMsTehZ7W3j/fP9UYrJqYqvGpe3Vj3xblO5pwBYmq7sg3jAmmuCgAgOW6VGf7cRMucrsmFeo7VM="
+        - SCRIPT=ci_stability.sh PRODUCT=sauce:MicrosoftEdge:14.14393 PLATFORM='Windows 10'
 script:
   - bash $SCRIPT
 cache:
@@ -53,4 +68,4 @@ notifications:
   email:
     on_success: never
     on_failure: always
-  webhooks: https://w3c-test.org/prbuildbot.py
+  webhooks: http://162.243.85.104/prbuildbot/travis/
