@@ -1,0 +1,47 @@
+<!doctype html>
+<meta charset=utf-8>
+<title>Test Tautologies</title>
+<script src=/resources/testharness.js></script>
+<script src=/resources/testharnessreport.js></script>
+<div id=log></div>
+<script>
+test(function() {
+  assert_true(true);
+}, "assert_true");
+
+test(function() {
+  assert_false(false);
+}, "assert_false");
+
+test(function() {
+  assert_equals(1, 1);
+}, "assert_equals");
+
+test(function() {
+  assert_not_equals(1, 2);
+}, "assert_not_equals");
+
+test(function() {
+  assert_in_array(1, [1]);
+}, "assert_in_array");
+
+test(function() {
+  assert_array_equals([1], [1]);
+}, "assert_array_equals");
+
+test(function() {
+  assert_approx_equals(1, 2, 10);
+}, "assert_approx_equals");
+
+test(function() {
+  assert_less_than(1, 2);
+}, "assert_less_than");
+
+test(function() {
+  assert_greater_than(2, 1);
+}, "assert_greater_than");
+
+test(function() {
+  assert_between_inclusive(2, 1, 3);
+}, "assert_between_inclusive");
+</script>
