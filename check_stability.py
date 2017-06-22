@@ -796,25 +796,45 @@ def write_results(results, iterations, comment_pr):
 
 def post_results(results, pr_number, iterations, product, url, status):
     """Post stability results to a given URL."""
+    payload_results = []
+
+    for test_name, test in results.iteritems():
+        subtests = []
+        for subtest_name, subtest in test['subtests'].items():
+            subtests.append({
+                'test': subtest_name,
+                'result': {
+                    'messages': list(subtest['messages']),
+                    'status': subtest['status']
+                },
+            })
+        payload_results.append({
+            'test': test_name,
+            'result': {
+                'status': test['status'],
+                'subtests': subtests
+            }
+        })
+
     payload = {
         "pull": {
-            "number": pr_number,
+            "number": int(pr_number),
             "sha": os.environ.get("TRAVIS_PULL_REQUEST_SHA"),
         },
         "job": {
-            "id": os.environ.get("TRAVIS_JOB_ID"),
+            "id": int(os.environ.get("TRAVIS_JOB_ID")),
             "number": os.environ.get("TRAVIS_JOB_NUMBER"),
-            "allow_failure": os.environ.get("TRAVIS_ALLOW_FAILURE"),
+            "allow_failure": os.environ.get("TRAVIS_ALLOW_FAILURE") == 'true',
             "status": status,
         },
         "build": {
-            "id": os.environ.get("TRAVIS_BUILD_ID"),
+            "id": int(os.environ.get("TRAVIS_BUILD_ID")),
             "number": os.environ.get("TRAVIS_BUILD_NUMBER"),
         },
         "product": product,
         "iterations": iterations,
         "message": "All results were stable." if status == "passed" else "Unstable results.",
-        "results": results,
+        "results": payload_results,
     }
 
     requests.post(url, json=payload)
