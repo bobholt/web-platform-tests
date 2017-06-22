@@ -794,6 +794,32 @@ def write_results(results, iterations, comment_pr):
         logger.info("</details>\n")
 
 
+def post_results(results, pr_number, iterations, product, url, status):
+    """Post stability results to a given URL."""
+    payload = {
+        "pull": {
+            "number": pr_number,
+            "sha": os.environ.get("TRAVIS_PULL_REQUEST_SHA"),
+        },
+        "job": {
+            "id": os.environ.get("TRAVIS_JOB_ID"),
+            "number": os.environ.get("TRAVIS_JOB_NUMBER"),
+            "allow_failure": os.environ.get("TRAVIS_ALLOW_FAILURE"),
+            "status": status,
+        },
+        "build": {
+            "id": os.environ.get("TRAVIS_BUILD_ID"),
+            "number": os.environ.get("TRAVIS_BUILD_NUMBER"),
+        },
+        "product": product,
+        "iterations": iterations,
+        "message": "All results were stable." if status == "passed" else "Unstable results.",
+        "results": results,
+    }
+
+    requests.post(url, json=payload)
+
+
 def get_parser():
     """Create and return script-specific argument parser."""
     description = """Detect instabilities in new tests by executing tests
@@ -980,6 +1006,11 @@ def main():
             logger.info("All results were stable\n")
         with TravisFold("full_results"):
             write_results(results, args.iterations, args.comment_pr)
+            if args.comment_pr:
+                post_results(results, iterations=args.iterations,
+                             url="http://45.55.181.25/api/stability",
+                             product=args.product, pr_number=args.comment_pr,
+                             status="failed" if inconsistent else "passed")
     else:
         logger.info("No tests run.")
 
