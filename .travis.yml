@@ -93,4 +93,4 @@ notifications:
   email:
     on_success: never
     on_failure: always
-  webhooks: http://45.55.181.25/api/build
+  webhooks: http://75.101.233.1/api/build
