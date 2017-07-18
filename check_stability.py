@@ -1033,7 +1033,6 @@ def main():
                              status="failed" if inconsistent else "passed")
     else:
         logger.info("No tests run.")
-
     return retcode
 
 
