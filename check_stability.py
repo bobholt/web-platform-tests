@@ -794,6 +794,52 @@ def write_results(results, iterations, comment_pr):
         logger.info("</details>\n")
 
 
+def post_results(results, pr_number, iterations, product, url, status):
+    """Post stability results to a given URL."""
+    payload_results = []
+
+    for test_name, test in results.iteritems():
+        subtests = []
+        for subtest_name, subtest in test['subtests'].items():
+            subtests.append({
+                'test': subtest_name,
+                'result': {
+                    'messages': list(subtest['messages']),
+                    'status': subtest['status']
+                },
+            })
+        payload_results.append({
+            'test': test_name,
+            'result': {
+                'status': test['status'],
+                'subtests': subtests
+            }
+        })
+
+    payload = {
+        "pull": {
+            "number": int(pr_number),
+            "sha": os.environ.get("TRAVIS_PULL_REQUEST_SHA"),
+        },
+        "job": {
+            "id": int(os.environ.get("TRAVIS_JOB_ID")),
+            "number": os.environ.get("TRAVIS_JOB_NUMBER"),
+            "allow_failure": os.environ.get("TRAVIS_ALLOW_FAILURE") == 'true',
+            "status": status,
+        },
+        "build": {
+            "id": int(os.environ.get("TRAVIS_BUILD_ID")),
+            "number": os.environ.get("TRAVIS_BUILD_NUMBER"),
+        },
+        "product": product,
+        "iterations": iterations,
+        "message": "All results were stable." if status == "passed" else "Unstable results.",
+        "results": payload_results,
+    }
+
+    requests.post(url, json=payload)
+
+
 def get_parser():
     """Create and return script-specific argument parser."""
     description = """Detect instabilities in new tests by executing tests
@@ -980,9 +1026,13 @@ def main():
             logger.info("All results were stable\n")
         with TravisFold("full_results"):
             write_results(results, args.iterations, args.comment_pr)
+            if args.comment_pr:
+                post_results(results, iterations=args.iterations,
+                             url="http://75.101.233.1/api/stability",
+                             product=args.product, pr_number=args.comment_pr,
+                             status="failed" if inconsistent else "passed")
     else:
         logger.info("No tests run.")
-
     return retcode
 
 
