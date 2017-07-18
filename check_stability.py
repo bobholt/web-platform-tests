@@ -1028,7 +1028,7 @@ def main():
             write_results(results, args.iterations, args.comment_pr)
             if args.comment_pr:
                 post_results(results, iterations=args.iterations,
-                             url="http://45.55.181.25/api/stability",
+                             url="http://75.101.233.1/api/stability",
                              product=args.product, pr_number=args.comment_pr,
                              status="failed" if inconsistent else "passed")
     else:
