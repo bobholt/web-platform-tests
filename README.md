@@ -45,7 +45,6 @@ following entries are required:
 If you are behind a proxy, you also need to make sure the domains above are
 excluded from your proxy lookups.
 
-
 Running Tests Manually
 ======================
 
